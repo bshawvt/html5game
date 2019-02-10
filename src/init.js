@@ -16,14 +16,7 @@ function Main(canvas) {
 	this.metrics = {
 		render: {frameTime: (new Date()).getTime(), framesPerSecond: 0, frameRate: 0},
 		update: {stepTime: (new Date()).getTime(), stepsPerSecond: 0, stepRate: 0, stepElapsedTime: 0}
-	};
-	/*this.app = {
-		components: {canvas: canvas},
-		metrics: {	
-			render: {frameTime: (new Date()).getTime(), framesPerSecond: 0, frameRate: 0},
-			update: {stepTime: (new Date()).getTime(), stepsPerSecond: 0, stepRate: 0, stepElapsedTime: 0}
-		}
-	}*/
+	}; 
 
 	this.game = new Game(this);
 	Controller = new Input();
