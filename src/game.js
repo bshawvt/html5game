@@ -53,39 +53,14 @@ function Game(invoker) {
 	}*/
 
 }
-var editor = false;
+//var editor = false;
 Game.prototype.update = function(dt) {
 	this.sceneManager.flush();
 
 	// update game state logic
-	if (editor == true) {
-		
-		if (Controller.getMouseState(Input.MOUSE_LEFT)) {
-			if (this.hasClicked == true) { return; }
+	
 
-			var m2d = Controller.getMousePosition();
-
-			var m3d = {x: (m2d.x/window.innerWidth) * 2 - 1, y: -(m2d.y/window.innerHeight) * 2 + 1};
-			var p0 = new THREE.Vector3(m3d.x, m3d.y, 0.0).unproject(this.scene.camera);
-			var p1 = new THREE.Vector3(m3d.x, m3d.y, 1.0).unproject(this.scene.camera);
-			
-			var t = -p0.z / (p1.z - p0.z);
-			var p2 = {x: p0.x + (p1.x-p0.x) * t, y: p0.y + (p1.y-p0.y) * t, z: 0.0};
-			//p2.add()
-			this.hasClicked = true;
-
-			var nx = Math.floor(p2.x);
-			var ny = Math.floor(p2.y);
-			if ((nx >= 0 && nx < this.level.width) && (ny >= 0 && ny < this.level.height)) {
-				this.sceneManager.add(new FloorObject({x:nx, y:ny}));
-				this.level.cells[nx][ny].solid = false;
-			}
-		} else {
-			this.hasClicked = false;
-		}
-	}
-
-	this.sceneManager.update({active:!editor,dt:dt});
+	this.sceneManager.update({active:!this.level.edit,dt:dt});
 	
 };
 Game.prototype.render = function(dt) {

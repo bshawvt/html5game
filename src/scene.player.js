@@ -98,7 +98,7 @@ PlayerObject.prototype.step = function(state) {
 			//console.log(this);
 
 		}
-		console.log(nx, ny);
+		//console.log(nx, ny);
 
 		//this.level[this.player.position.x + boffx][this.player.position.x - boffy].objects.push(this.player);
 

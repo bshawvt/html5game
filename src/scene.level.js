@@ -10,6 +10,27 @@ function SceneLevel(invoker, opt) {
 		}
 	}
 	this.threeObj = null;
+	this.edit = false;
+	var editor = UI.createLevelEditor();
+	var self = this;
+	editor.toggle.onclick = function(e) {
+		self.edit = !self.edit;
+	}
+
+	editor.openConsole.onclick = function(e) {
+		var item = UI.uiCreateConsole("console");
+		UI.uiUpdateElement(item.parent, {x: 10, y: 10, w: 250, h: 150});
+		item.input.onkeydown = function(e) { 
+			if (e.keyCode == 13) {
+				item.console.appendChild(UI.uiCreateElement({name: "span", text: this.value}));// += this.value + 
+				item.console.appendChild(UI.uiCreateElement({name: "br"}));
+				item.console.scrollTop = item.console.scrollHeight;
+				new Command(self, this.value, item.console);
+				this.value = "";
+				
+			}
+		};
+	}
 	//return this;
 }
 SceneLevel.prototype.moveObject = function(obj, from, to) {
@@ -89,5 +110,30 @@ SceneLevel.prototype.render = function() {
 
 };
 SceneLevel.prototype.step = function() {
+	if (this.edit == true) {
+		
+		if (Controller.getMouseState(Input.MOUSE_LEFT)) {
+			if (this.hasClicked == true) { return; }
 
+			var m2d = Controller.getMousePosition();
+
+			var m3d = {x: (m2d.x/window.innerWidth) * 2 - 1, y: -(m2d.y/window.innerHeight) * 2 + 1};
+			var p0 = new THREE.Vector3(m3d.x, m3d.y, 0.0).unproject(this.sceneManager.scene.camera);
+			var p1 = new THREE.Vector3(m3d.x, m3d.y, 1.0).unproject(this.sceneManager.scene.camera);
+			
+			var t = -p0.z / (p1.z - p0.z);
+			var p2 = {x: p0.x + (p1.x-p0.x) * t, y: p0.y + (p1.y-p0.y) * t, z: 0.0};
+			//p2.add()
+			this.hasClicked = true;
+
+			var nx = Math.floor(p2.x);
+			var ny = Math.floor(p2.y);
+			if ((nx >= 0 && nx < this.width) && (ny >= 0 && ny < this.height)) {
+				this.sceneManager.add(new FloorObject({x:nx, y:ny}));
+				this.cells[nx][ny].solid = false;
+			}
+		} else {
+			this.hasClicked = false;
+		}
+	}
 };

@@ -52,7 +52,7 @@ function HighlightObject(opt) {
 	//console.log(tex);
 	//tex.repeat.set(0.25, 0.25);//1.0/128, 1.0/128)
 	//tex.offset.y = 0.5;
-	var mat = new THREE.MeshBasicMaterial({color: 0x501010, opacity: 0.0});//, side: THREE.DoubleSide } );
+	var mat = new THREE.MeshBasicMaterial({color: 0xf79696, opacity: 0.0});//, side: THREE.DoubleSide } );
 	this.threeObj = new THREE.Mesh(geo, mat); // player
 	
 	this.threeObj.position.x = this.cell.x;
@@ -62,10 +62,10 @@ function HighlightObject(opt) {
 	this.threeObj.scale.x = 1;
 	this.threeObj.scale.y = 1;
 
+	this.threeObj.renderOrder = 1;
+
 	this.hasClicked = false;
-
-
-	
+	this.color = 0;
 
 }
 HighlightObject.prototype.step = function(state) {
@@ -77,16 +77,46 @@ HighlightObject.prototype.step = function(state) {
 	
 	var t = -p0.z / (p1.z - p0.z);
 	var p2 = {x: p0.x + (p1.x-p0.x) * t, y: p0.y + (p1.y-p0.y) * t, z: 0.0};
-	//p2.add()
+
 	this.hasClicked = true;
 
 	var nx = Math.floor(p2.x);
 	var ny = Math.floor(p2.y);
 	if ((nx >= 0 && nx < this.sceneManager.level.width) && (ny >= 0 && ny < this.sceneManager.level.height)) {
-		//this.sceneManager.add(new FloorObject({x:nx, y:ny}));
-		//this.level.cells[nx][ny].solid = false;
+		
 		this.threeObj.position.x = nx;
 		this.threeObj.position.y = ny;
+
+		if (this.sceneManager.level.cells[nx][ny].solid == false) {
+			if (this.color == 1) {
+				this.color = 0;
+				this.threeObj.material.color.r = 0.580;
+				this.threeObj.material.color.g = 0.960;
+				this.threeObj.material.color.b = 0.580;
+				this.threeObj.material.needsUpdate = true;
+			}
+		}
+		else {
+			if (this.color == 0) {
+				this.color = 1;
+				this.threeObj.material.color.r = 0.960;
+				this.threeObj.material.color.g = 0.580;
+				this.threeObj.material.color.b = 0.580;
+				this.threeObj.material.needsUpdate = true;
+			}
+		};
+		var pcell = this.sceneManager.player.cell;
+		var to1 = Math.floor((nx * nx) + (ny * ny));
+		var to2 = Math.floor((pcell.x * pcell.x) + (pcell.y * pcell.y));
+		console.log(to1, to2, to1-to2);
+
+
+		//this.sceneManager.player.cell.x;// = 0.0;
+
+		//if (Controller.getMouseState(Input.MOUSE_LEFT) && state.active==true) {
+		//	console.log(this.sceneManager.player);
+		//}
+
 	}
 	
 };
