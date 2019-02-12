@@ -52,17 +52,17 @@ function HighlightObject(opt) {
 	//console.log(tex);
 	//tex.repeat.set(0.25, 0.25);//1.0/128, 1.0/128)
 	//tex.offset.y = 0.5;
-	var mat = new THREE.MeshBasicMaterial({color: 0xf79696, opacity: 0.0});//, side: THREE.DoubleSide } );
+	var mat = new THREE.MeshBasicMaterial({color: 0xf79696, transparent: true, opacity: 0.5});//, side: THREE.DoubleSide } );
 	this.threeObj = new THREE.Mesh(geo, mat); // player
 	
 	this.threeObj.position.x = this.cell.x;
 	this.threeObj.position.y = this.cell.y;
-	this.threeObj.position.z = 0.0;
+	this.threeObj.position.z = 0.01;
 
 	this.threeObj.scale.x = 1;
 	this.threeObj.scale.y = 1;
 
-	this.threeObj.renderOrder = 1;
+	this.threeObj.renderOrder = 2;
 
 	this.hasClicked = false;
 	this.color = 0;
@@ -108,7 +108,7 @@ HighlightObject.prototype.step = function(state) {
 		var pcell = this.sceneManager.player.cell;
 		var to1 = Math.floor((nx * nx) + (ny * ny));
 		var to2 = Math.floor((pcell.x * pcell.x) + (pcell.y * pcell.y));
-		console.log(to1, to2, to1-to2);
+		//console.log(to1, to2, to1-to2);
 
 
 		//this.sceneManager.player.cell.x;// = 0.0;

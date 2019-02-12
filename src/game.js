@@ -40,17 +40,32 @@ function Game(invoker) {
 	this.level.generateLevelMesh();
 
 	this.sceneManager = new SceneManager(this);
-	console.log(this.level);
 	this.sceneManager.add(this.level);
 	this.sceneManager.add(new PlayerObject(), true);
 	this.sceneManager.add(new BearObject({x:2, y:3}));
 
-	/*for(var ix = 0; ix < 10; ix++) {
-		//this.sceneManager.add(new FloorObject({x:ix, y:iy}));
-		for(var iy = 0; iy < 10; iy++) { 
-			this.sceneManager.add(new FloorObject({x:ix, y:iy}));
-		}
-	}*/
+	var editor = UI.createLevelEditor();
+	editor.toggle.onclick = function(e) {
+		self.level.edit = !self.level.edit;
+	}
+
+	editor.openConsole.onclick = function(e) {
+		var item = UI.uiCreateConsole("console");
+		UI.uiUpdateElement(item.parent, {x: 10, y: 10, w: 250, h: 150});
+		item.input.onkeydown = function(e) { 
+			if (e.keyCode == 13) {
+				item.console.appendChild(UI.uiCreateElement({name: "span", text: this.value}));// += this.value + 
+				item.console.appendChild(UI.uiCreateElement({name: "br"}));
+				item.console.scrollTop = item.console.scrollHeight;
+				new Command(self, this.value, item.console);
+				this.value = "";
+				
+			}
+		};
+	}
+
+	this.uiActive = false;
+	this.uiActiveReady = false;
 
 }
 //var editor = false;
@@ -58,9 +73,18 @@ Game.prototype.update = function(dt) {
 	this.sceneManager.flush();
 
 	// update game state logic
-	
+	if (Controller.getButtonState(Input.KEY_Q)) {
+		if (this.uiActive !== this.uiActiveReady) {
+			this.uiActive = !this.uiActive;
+			this.uiActiveReady = this.uiActive;
+			console.log(this.uiActive);
+		}
+	}
+	else {
+		this.uiActiveReady = -1;
+	}
 
-	this.sceneManager.update({active:!this.level.edit,dt:dt});
+	this.sceneManager.update({active:this.uiActive,dt:dt});
 	
 };
 Game.prototype.render = function(dt) {

@@ -26,9 +26,11 @@ function SceneManager(invoker) {
 	geo.addAttribute('position', new THREE.BufferAttribute(verts, 3));
 	var mat = new THREE.LineBasicMaterial( { color: 0xcecece } );
 	this.map = new THREE.LineSegments(geo, mat); // map
-	this.scene.add(this.map);
+	this.map.renderOrder = 0;
+	//this.scene.add(this.map);
 	this.map.position.x = 0.0;//1.0;
 	this.map.position.y = 0.0;//-0.5;
+	this.map.position.z = 0.0;//-0.5;
 	//this.map.position:
 	this.map.scale.x = 1;
 	this.map.scale.y = 1;
@@ -57,6 +59,10 @@ SceneManager.prototype.remove = function(obj) {
 	obj.deleted = true;
 	this.objectsQueue.push(obj);
 };
+SceneManager.prototype.removeSceneObject = function(obj) {
+	this.scene.remove(obj);
+};
+
 SceneManager.prototype.flush = function() {
 	for(var i = 0; i < this.objectsQueue.length; i++)  {
 		var obj = this.objectsQueue[i];

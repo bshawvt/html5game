@@ -41,7 +41,7 @@ function BearObject(opt) {
 				1.0, 1.0, 
 				0.0, 1.0	];
 
-	this.boffx = 0.2;
+	this.boffx = 0.5;
 	this.boffy = 1;
 
 	geo.addAttribute('position', new THREE.BufferAttribute(new Float32Array(verts), 3));
@@ -59,6 +59,7 @@ function BearObject(opt) {
 	this.threeObj.scale.x = 2;
 	this.threeObj.scale.y = 2;
 
+	this.threeObj.renderOrder = 10;
 	
 
 }

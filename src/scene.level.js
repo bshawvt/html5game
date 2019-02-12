@@ -6,32 +6,12 @@ function SceneLevel(invoker, opt) {
 	for(var lx = 0; lx < this.width; lx++) {
 		this.cells[lx] = [];
 		for(var ly = 0; ly < this.height; ly++) {
-			this.cells[lx][ly] = {solid: true, objects: []};
+			this.cells[lx][ly] = {solid: true, texCoord: {x: 0.0, y: 0.0}, objects: []};
 		}
 	}
 	this.threeObj = null;
 	this.edit = false;
-	var editor = UI.createLevelEditor();
-	var self = this;
-	editor.toggle.onclick = function(e) {
-		self.edit = !self.edit;
-	}
-
-	editor.openConsole.onclick = function(e) {
-		var item = UI.uiCreateConsole("console");
-		UI.uiUpdateElement(item.parent, {x: 10, y: 10, w: 250, h: 150});
-		item.input.onkeydown = function(e) { 
-			if (e.keyCode == 13) {
-				item.console.appendChild(UI.uiCreateElement({name: "span", text: this.value}));// += this.value + 
-				item.console.appendChild(UI.uiCreateElement({name: "br"}));
-				item.console.scrollTop = item.console.scrollHeight;
-				new Command(self, this.value, item.console);
-				this.value = "";
-				
-			}
-		};
-	}
-	//return this;
+	this.texCoord = {x: 0.0, y:0.0}
 }
 SceneLevel.prototype.moveObject = function(obj, from, to) {
 	console.log(this.cells[to.x][to.y]);
@@ -47,8 +27,12 @@ SceneLevel.prototype.moveObject = function(obj, from, to) {
 	return true;
 };
 SceneLevel.prototype.generateLevelMesh = function() {
-	this.threeObj = null;
-	
+	//this.threeObj = null;
+	if (this.threeObj !== null) {
+		this.threeObj.geometry.dispose();
+		this.threeObj = null;
+		console.log("asdasd");
+	}
 	var geo = new THREE.BufferGeometry();
 	/*var verts = [	0, 0, 0,
 					0, 1, 0,
@@ -57,30 +41,140 @@ SceneLevel.prototype.generateLevelMesh = function() {
 					1, 1, 0,
 					1, 0, 0,
 					0, 1, 0 ];*/
-	var verts = [	1, 0, 0,
+
+	var xv = 0.0;
+	var yv = 0.0;
+	var verts = [];
+	var uvs = [];
+
+	for(var x = 0; x < this.cells.length; x++) {
+		for(var y = 0; y < this.cells[x].length; y++) {
+			//if (Math.floor(Math.random()*10)==5) {
+			if (this.cells[x][y].solid == false) {
+				verts.push(1 + x); 
+				verts.push(0 + y);
+				verts.push(0);
+
+				verts.push(1 + x);
+				verts.push(1 + y);
+				verts.push(0);
+
+				verts.push(0 + x);
+				verts.push(0 + y);
+				verts.push(0);
+
+				verts.push(0 + x);
+				verts.push(0 + y);
+				verts.push(0);
+
+				verts.push(1 + x);
+				verts.push(1 + y);
+				verts.push(0);
+
+				verts.push(0 + x);
+				verts.push(1 + y);
+				verts.push(0);
+
+				var cell = this.cells[x][y];
+				var texCoord = {x: cell.texCoord.x, y: cell.texCoord.y};
+				console.log(texCoord);
+				uvs.push(0.25 + texCoord.x);
+				uvs.push(0.00 + texCoord.y);
+
+				uvs.push(0.25 + texCoord.x);
+				uvs.push(0.25 + texCoord.y);
+
+				uvs.push(0.00 + texCoord.x);
+				uvs.push(0.00 + texCoord.y);
+
+				uvs.push(0.00 + texCoord.x);
+				uvs.push(0.00 + texCoord.y);
+
+				uvs.push(0.25 + texCoord.x);
+				uvs.push(0.25 + texCoord.y);
+
+				uvs.push(0.00 + texCoord.x);
+				uvs.push(0.25 + texCoord.y);
+			};
+
+		}
+
+	}
+	/*
+	0.25 + xoff1, 0.00 + yoff1, 
+	0.25 + xoff1, 0.25 + yoff1, 
+	0.00 + xoff1, 0.00 + yoff1, 
+
+	0.00 + xoff1, 0.00 + yoff1,
+	0.25 + xoff1, 0.25 + yoff1, 
+	0.00 + xoff1, 0.25 + yoff1,	
+
+	0.25 + xoff2, 0.00 + yoff2, 
+	0.25 + xoff2, 0.25 + yoff2, 
+	0.00 + xoff2, 0.00 + yoff2, 
+
+	0.00 + xoff2, 0.00 + yoff2,
+	0.25 + xoff2, 0.25 + yoff2, 
+	0.00 + xoff2, 0.25 + yoff2	
+	*/
+	/*var verts = [	1, 0, 0,
 					1, 1, 0,
 					0, 0, 0,
 
 					0, 0, 0,
 					1, 1, 0, 
 					0, 1, 0]
-
-
-
-	var uvs = [ 1.0, 0.0, 
-				1.0, 1.0, 
+	var uvs = [ 0.5, 0.0, 
+				0.5, 0.5, 
 				0.0, 0.0, 
 
 				0.0, 0.0,
-				1.0, 1.0, 
-				0.0, 1.0	];
+				0.5, 0.5, 
+				0.0, 0.5	];*/
+	/*var verts = [	1 + xv, 0 + yv, 0,
+					1 + xv, 1 + yv, 0,
+					0 + xv, 0 + yv, 0,
+
+					0 + xv, 0 + yv, 0,
+					1 + xv, 1 + yv, 0, 
+					0 + xv, 1 + yv, 0,
+
+					2 + xv, 1 + yv, 0,
+					2 + xv, 2 + yv, 0,
+					1 + xv, 1 + yv, 0,
+
+					1 + xv, 1 + yv, 0,
+					2 + xv, 2 + yv, 0, 
+					1 + xv, 2 + yv, 0]
+
+
+	var xoff1 = 0.25;//0.25;
+	var yoff1 = 0.75;//1.0;
+	var xoff2 = 0.0;
+	var yoff2 = 0.75;
+
+	var uvs = [ 0.25 + xoff1, 0.00 + yoff1, 
+				0.25 + xoff1, 0.25 + yoff1, 
+				0.00 + xoff1, 0.00 + yoff1, 
+
+				0.00 + xoff1, 0.00 + yoff1,
+				0.25 + xoff1, 0.25 + yoff1, 
+				0.00 + xoff1, 0.25 + yoff1,	
+
+				0.25 + xoff2, 0.00 + yoff2, 
+				0.25 + xoff2, 0.25 + yoff2, 
+				0.00 + xoff2, 0.00 + yoff2, 
+
+				0.00 + xoff2, 0.00 + yoff2,
+				0.25 + xoff2, 0.25 + yoff2, 
+				0.00 + xoff2, 0.25 + yoff2	];*/
 
 	this.boffx = 0.2;
 	this.boffy = 1;
 
 	geo.addAttribute('position', new THREE.BufferAttribute(new Float32Array(verts), 3));
 	geo.addAttribute('uv', new THREE.BufferAttribute(new Float32Array(uvs), 2));
-	var tex = new THREE.TextureLoader().load('data/grass.png');
+	var tex = new THREE.TextureLoader().load('data/floors.png');
 	//console.log(tex);
 	//tex.repeat.set(0.25, 0.25);//1.0/128, 1.0/128)
 	//tex.offset.y = 0.5;
@@ -94,7 +188,10 @@ SceneLevel.prototype.generateLevelMesh = function() {
 	this.threeObj.scale.x = 1;
 	this.threeObj.scale.y = 1;
 
-	this.threeObj.renderOrder = -1;
+	this.threeObj.renderOrder = 1;
+	this.threeObj.geometry.attributes.position.needsUpdate = true;
+	this.threeObj.geometry.attributes.uv.needsUpdate = true;
+	console.log(this.threeObj);
 	return this.threeObj;
 };
 SceneLevel.prototype.setReady = function(state) {
@@ -129,11 +226,26 @@ SceneLevel.prototype.step = function() {
 			var nx = Math.floor(p2.x);
 			var ny = Math.floor(p2.y);
 			if ((nx >= 0 && nx < this.width) && (ny >= 0 && ny < this.height)) {
-				this.sceneManager.add(new FloorObject({x:nx, y:ny}));
+				//this.sceneManager.add(new FloorObject({x:nx, y:ny}));
 				this.cells[nx][ny].solid = false;
+				this.cells[nx][ny].texCoord.x = this.texCoord.x;
+				this.cells[nx][ny].texCoord.y = this.texCoord.y;
+				this.sceneManager.removeSceneObject(this.threeObj);
+				this.generateLevelMesh();
+				this.sceneManager.scene.add(this.threeObj);
 			}
 		} else {
 			this.hasClicked = false;
+		}
+
+		if (Controller.getButtonState(Input.KEY_1)) {
+			this.texCoord.x = 0.25;
+			this.texCoord.y = 0.75;
+			console.log("test");
+		}
+		if (Controller.getButtonState(Input.KEY_2)) {
+			this.texCoord.x = 0.25;
+			this.texCoord.y = 0.50;
 		}
 	}
 };

@@ -49,7 +49,7 @@ function PlayerObject() {
 				0.5, 0.5, 
 				0.0, 0.5	];
 
-	this.boffx = 0.2;
+	this.boffx = 0.5;
 	this.boffy = 1;
 
 	geo.addAttribute('position', new THREE.BufferAttribute(new Float32Array(verts), 3));
@@ -68,7 +68,9 @@ function PlayerObject() {
 	this.threeObj.scale.x = 2;
 	this.threeObj.scale.y = 2;
 
-	
+	this.threeObj.renderOrder = 10;
+
+
 
 }
 PlayerObject.prototype.step = function(state) {

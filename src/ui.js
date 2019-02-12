@@ -1,23 +1,3 @@
-//var ipsum = "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Donec nisl arcu, egestas quis dapibus ac, mollis id augue. Vestibulum pellentesque vehicula turpis non consequat. Proin vitae sapien vulputate, tempor elit in, vestibulum metus. Nunc vel tellus nibh. Curabitur eu lacus tristique, tincidunt sem eu, consectetur leo. Donec ac laoreet tortor, sed blandit turpis. In sollicitudin convallis aliquam. Nunc sed nisi eu est sagittis convallis dictum sed nibh. Donec malesuada imperdiet erat, in bibendum odio pellentesque condimentum.";
-
-/*(() => {
-	var item = null;
-	item = uiCreateConsole("dummy container");
-	item.console.appendChild(uiCreateElement({name: "div", text: ipsum}));
-	uiUpdateElement(item.parent, {x: 100, y: 100, w: 400, h: 100});
-	item = uiCreateConsole("console" + Math.random() * 10);
-	uiUpdateElement(item.parent, {x: 150, y: 150, w: 250, h: 150});
-	item.input.onkeydown = function(e) { 
-		if (e.keyCode == 13) {
-			item.console.appendChild(uiCreateElement({name: "span", text: this.value}));// += this.value + 
-			item.console.appendChild(uiCreateElement({name: "br"}));
-			item.console.scrollTop = item.console.scrollHeight;
-			this.value = "";
-			console.log(item);
-		}
-	};
-	console.log(item);
-})();*/
 function UserInterface() {
 	this.ui = {
 		enabled: true,	// pointerlock : false
@@ -257,10 +237,10 @@ UserInterface.prototype.createLevelEditor = function(first_argument) {
 	
 	var containerBody = this.uiCreateElement({name: "div", className: "ui-default-body"});
 	
-	var button = this.uiCreateElement({name: "button", className: "ui-button", text: "Toggle Editor"});
+	var button = this.uiCreateElement({name: "button", className: "ui-button noselect", text: "Toggle Editor"});
 	containerBody.appendChild(button);
 	
-	var button2 = this.uiCreateElement({name: "button", className: "ui-button", text: "Open Console"});
+	var button2 = this.uiCreateElement({name: "button", className: "ui-button noselect", text: "Open Console"});
 	containerBody.appendChild(button2);
 	container.appendChild(containerBody);
 
