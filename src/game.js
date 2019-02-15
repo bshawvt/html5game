@@ -46,13 +46,22 @@ function Game(invoker) {
 
 	var editor = UI.createLevelEditor();
 	editor.toggle.onclick = function(e) {
+		if (!UI.isEnabled()) { return; }
 		self.level.edit = !self.level.edit;
+		UI.createNotification("Level editor is " + self.level.edit);
+		//self.uiActive = !self.level.edit;
+		//console.log(self.uiActive);
+
 	}
 
+
 	editor.openConsole.onclick = function(e) {
+		if (!UI.isEnabled()) { return; }
 		var item = UI.uiCreateConsole("console");
+		editor.consoleInput = item.input;
 		UI.uiUpdateElement(item.parent, {x: 10, y: 10, w: 250, h: 150});
 		item.input.onkeydown = function(e) { 
+			//if (!UI.isEnabled()) { return; }
 			if (e.keyCode == 13) {
 				item.console.appendChild(UI.uiCreateElement({name: "span", text: this.value}));// += this.value + 
 				item.console.appendChild(UI.uiCreateElement({name: "br"}));
@@ -67,24 +76,31 @@ function Game(invoker) {
 	this.uiActive = false;
 	this.uiActiveReady = false;
 
+	Controller.addInputEvent(Input.KEY_TAB, function(e){ 
+		//this.uiActive = !this.uiActive;
+		//console.log(e);
+		UI.enable(!UI.isEnabled());
+		UI.createNotification("UI.enabled: " + UI.isEnabled());
+
+		if (UI.isEnabled()) {
+			if (editor.consoleInput) {
+				editor.consoleInput.focus();
+			}
+			//console.log(editor);
+		}
+
+		//e.preventDefault();
+	}, 1);
+
 }
 //var editor = false;
 Game.prototype.update = function(dt) {
 	this.sceneManager.flush();
 
 	// update game state logic
-	if (Controller.getButtonState(Input.KEY_Q)) {
-		if (this.uiActive !== this.uiActiveReady) {
-			this.uiActive = !this.uiActive;
-			this.uiActiveReady = this.uiActive;
-			console.log(this.uiActive);
-		}
-	}
-	else {
-		this.uiActiveReady = -1;
-	}
 
-	this.sceneManager.update({active:this.uiActive,dt:dt});
+
+	this.sceneManager.update({active:!UI.isEnabled(),dt:dt});
 	
 };
 Game.prototype.render = function(dt) {
