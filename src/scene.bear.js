@@ -54,7 +54,7 @@ function BearObject(opt) {
 	
 	this.threeObj.position.x = (opt.x ? opt.x:0.0);// - this.boffx;
 	this.threeObj.position.y = (opt.y ? opt.y:0.0);// + this.boffy;
-	this.threeObj.position.z = (opt.z ? opt.z:0.01);
+	this.threeObj.position.z = (opt.z ? opt.z:0.0);
 
 	this.threeObj.scale.x = 2;
 	this.threeObj.scale.y = 2;

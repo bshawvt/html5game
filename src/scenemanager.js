@@ -27,7 +27,7 @@ function SceneManager(invoker) {
 	var mat = new THREE.LineBasicMaterial( { color: 0xcecece } );
 	this.map = new THREE.LineSegments(geo, mat); // map
 	this.map.renderOrder = 0;
-	//this.scene.add(this.map);
+	this.scene.add(this.map);
 	this.map.position.x = 0.0;//1.0;
 	this.map.position.y = 0.0;//-0.5;
 	this.map.position.z = 0.0;//-0.5;

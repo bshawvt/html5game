@@ -63,7 +63,7 @@ function PlayerObject() {
 	
 	this.threeObj.position.x = 0.0;// - this.boffx;
 	this.threeObj.position.y = 0.0;// + this.boffy;
-	this.threeObj.position.z = 0.25;
+	this.threeObj.position.z = 0.0;//25;
 
 	this.threeObj.scale.x = 2;
 	this.threeObj.scale.y = 2;

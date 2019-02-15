@@ -77,7 +77,7 @@ SceneLevel.prototype.generateLevelMesh = function() {
 
 				var cell = this.cells[x][y];
 				var texCoord = {x: cell.texCoord.x, y: cell.texCoord.y};
-				console.log(texCoord);
+
 				uvs.push(0.25 + texCoord.x);
 				uvs.push(0.00 + texCoord.y);
 
@@ -175,6 +175,8 @@ SceneLevel.prototype.generateLevelMesh = function() {
 	geo.addAttribute('position', new THREE.BufferAttribute(new Float32Array(verts), 3));
 	geo.addAttribute('uv', new THREE.BufferAttribute(new Float32Array(uvs), 2));
 	var tex = new THREE.TextureLoader().load('data/floors.png');
+	tex.wrapS = THREE.RepeatWrapping;
+	tex.wrapT = THREE.RepeatWrapping;
 	//console.log(tex);
 	//tex.repeat.set(0.25, 0.25);//1.0/128, 1.0/128)
 	//tex.offset.y = 0.5;
