@@ -17,9 +17,9 @@ function Main(canvas) {
 		render: {frameTime: (new Date()).getTime(), framesPerSecond: 0, frameRate: 0},
 		update: {stepTime: (new Date()).getTime(), stepsPerSecond: 0, stepRate: 0, stepElapsedTime: 0}
 	}; 
+	Controller = new Input();
 	UI = new UserInterface(this);
 	this.game = new Game(this);
-	Controller = new Input();
 };
 
 Main.prototype.loop = function(dt) {
