@@ -1,4 +1,7 @@
+// todo: method names need cleanup
+// onclick event depends on UI singleton being defined
 function UserInterface() {
+
 	this.ui = {
 		enabled: false,	// pointerlock : false
 		mobile: this.isMobile(), // 
@@ -109,21 +112,26 @@ UserInterface.prototype.uiEventStart = function(e) {
 
 }
 
-
 UserInterface.prototype.uiGrab = function(who, event) {
-	//console.log(who.parentElement.parentElement);
 	if (this.ui.enabled==false) { return; }
+
 	this.ui.draggable.resize = false;
 
 	if (who.parentElement !== null) {
-		this.uiUpdateElement(who.parentElement.parentElement, {pushZOrder: true});
-		this.uiUpdateElement(who.parentElement, {pushZOrder: true});
+		if (who.parentElement.parentElement.className.match(/(?:^|\s)ui-container(?!\S)/g )) {
+			this.uiUpdateElement(who.parentElement.parentElement, {pushZOrder: true});
+			this.uiUpdateElement(who.parentElement.parentElement.children[0].children[1], {pushZOrder: true});
+			this.uiUpdateElement(who.parentElement.parentElement.children[0].children[2], {pushZOrder: true});
+		}
+		else if (who.parentElement.className.match(/(?:^|\s)ui-container(?!\S)/g )) {
+			this.uiUpdateElement(who.parentElement, {pushZOrder: true});
+		}
+
 		if (who.className.match(/ui-icon-resize/) !== null) { // typical only to the resize icon for containers
 			this.ui.draggable.resize = true;
 			this.ui.draggable.active = true;
 			this.ui.draggable.id = who;
 		}
-		//this.ui.draggable.active = true;
 
 		if (parseInt(who.getAttribute('data-uidrag'),10) !== 1) { return; }
 		this.ui.draggable.active = true;
@@ -151,9 +159,28 @@ UserInterface.prototype.uiRemove = function(who, event) {
 UserInterface.prototype.uiResize = function(who, event) {
 	if (this.ui.enabled==false) { return; }
 }
-UserInterface.prototype.uiHide = function(who, event) {
+UserInterface.prototype.uiHide = function(who, event, offset) {
 	if (this.ui.enabled==false) { return; }
 	this.ui.draggable.active = false;
+
+	//console.log(who.parentElement.parentElement.children[1]);
+	if (offset !== undefined) {
+		var regex = new RegExp("(?:^|\\s)"+ offset + "(?!\\S)", 'g');
+		if (who.parentElement.parentElement.className.match(regex) == null) {
+			who.parentElement.parentElement.className += " " + offset;
+		}
+		else {
+			who.parentElement.parentElement.className = who.parentElement.parentElement.className.replace( regex , '' );
+		}
+	}
+	else {
+		if (who.parentElement.parentElement.className.match(/(?:^|\s)ui-collapsed(?!\S)/g ) == null) {
+			who.parentElement.parentElement.className += " ui-collapsed";
+		}
+		else {
+			who.parentElement.parentElement.className = who.parentElement.parentElement.className.replace( /(?:^|\s)ui-collapsed(?!\S)/g , '' );
+		}
+	}
 	//who.parentElement.parentElement.
 }
 UserInterface.prototype.uiUpdateElement = function(elem, opt) {
@@ -201,10 +228,10 @@ UserInterface.prototype.uiCreateElement = function(opt) {
 
 
 UserInterface.prototype.uiCreateConsole = function(title) {
-	var container = this.uiCreateElement({name: "div", className: "ui-console-container"});
+	var container = this.uiCreateElement({name: "div", className: "ui-container ui-console-container"});
 	var containerTitle = this.uiCreateElement({name: "div", className: "ui-console-title noselect", attributes: [{name: "data-uidrag", value: 1}], text: title});
-	var containerRemove = this.uiCreateElement({name: "button", className: "ui-console-title-button ui-icon-remove", attributes: [{name: "onclick", value: "UI.uiRemove(this, event)"}]});
-	var containerHide = this.uiCreateElement({name: "button", className: "ui-console-title-button ui-icon-hide", attributes: [{name: "onclick", value: "UI.uiHide(this, event)"}]});
+	var containerRemove = this.uiCreateElement({name: "button", className: "ui-console-title-button ui-icon ui-icon-remove", attributes: [{name: "onclick", value: "UI.uiRemove(this, event)"}]});
+	var containerHide = this.uiCreateElement({name: "button", className: "ui-console-title-button ui-icon ui-icon-hide", attributes: [{name: "onclick", value: "UI.uiHide(this, event, 'ui-collapsed-console')"}]});
 
 	containerTitle.appendChild(this.uiCreateElement({name: "span", className: "empty"}))
 	containerTitle.appendChild(containerRemove);
@@ -225,18 +252,18 @@ UserInterface.prototype.uiCreateConsole = function(title) {
 	container.appendChild(containerFooter);
 
 	//container.appendChild(uiCreateElement({name: "span", className: "clearfix"}));
-	var containerResize = this.uiCreateElement({name: "div", className: "ui-icon-resize noselect", attributes: [{name: "onclick", value: "UI.uiResize(this, event)"}]});
+	var containerResize = this.uiCreateElement({name: "div", className: "ui-icon ui-icon-resize noselect", attributes: [{name: "onclick", value: "UI.uiResize(this, event)"}]});
 	container.appendChild(containerResize);
 
 	document.body.appendChild(container);
 	//return container;
-	return {parent: container, console: containerTextarea, input: containerInput};
+	return {container: container, console: containerTextarea, input: containerInput};
 }
 UserInterface.prototype.createLevelEditor = function(first_argument) {
-	var container = this.uiCreateElement({name: "div", className: "ui-default-container"});
+	var container = this.uiCreateElement({name: "div", className: "ui-container ui-default-container"});
 	var containerTitle = this.uiCreateElement({name: "div", className: "ui-default-title noselect", attributes: [{name: "data-uidrag", value: 1}], text: "level editor"});
-	var containerRemove = this.uiCreateElement({name: "button", className: "ui-default-title-button ui-icon-remove", attributes: [{name: "onclick", value: "UI.uiRemove(this, event)"}]});
-	var containerHide = this.uiCreateElement({name: "button", className: "ui-default-title-button ui-icon-hide", attributes: [{name: "onclick", value: "UI.uiHide(this, event)"}]});
+	var containerRemove = this.uiCreateElement({name: "button", className: "ui-default-title-button ui-icon ui-icon-remove", attributes: [{name: "onclick", value: "UI.uiRemove(this, event)"}]});
+	var containerHide = this.uiCreateElement({name: "button", className: "ui-default-title-button ui-icon ui-icon-hide", attributes: [{name: "onclick", value: "UI.uiHide(this, event)"}]});
 
 	containerTitle.appendChild(this.uiCreateElement({name: "span", className: "empty"}))
 	containerTitle.appendChild(containerRemove);
@@ -254,18 +281,19 @@ UserInterface.prototype.createLevelEditor = function(first_argument) {
 	container.appendChild(containerBody);
 
 	//container.appendChild(uiCreateElement({name: "span", className: "clearfix"}));
-	var containerResize = this.uiCreateElement({name: "div", className: "ui-icon-resize noselect", attributes: [{name: "onclick", value: "UI.uiResize(this, event)"}]});
+	var containerResize = this.uiCreateElement({name: "div", className: "ui-icon ui-icon-resize noselect", attributes: [{name: "onclick", value: "UI.uiResize(this, event)"}]});
 	container.appendChild(containerResize);
 
 	document.body.appendChild(container);
 	//return container;
-	return {toggle: button, openConsole: button2};
+	return {toggle: button, openConsole: button2, container: container};
 };
 
 UserInterface.prototype.createNotification = function(msg) {
 
 	// template
-	var container = this.uiCreateElement({name: "div", className: "ui-notification-container noselect", attributes: [{name: "z-index", value: this.ui.index}]});
+	//this.ui.index++;
+	var container = this.uiCreateElement({name: "div", className: "ui-container ui-notification-container noselect", attributes: [{name: "z-index", value: this.ui.index}]});
 	//var containerTitle = this.uiCreateElement({text: "level editor", name: "div", className: "ui-default-title noselect", attributes: [{name: "data-uidrag", value: 1}]});
 	//var containerRemove = this.uiCreateElement({name: "button", className: "ui-default-title-button ui-icon-remove", attributes: [{name: "onclick", value: "UI.uiRemove(this, event)"}]});
 	//var containerHide = this.uiCreateElement({name: "button", className: "ui-default-title-button ui-icon-hide", attributes: [{name: "onclick", value: "UI.uiHide(this, event)"}]});
@@ -295,7 +323,7 @@ UserInterface.prototype.createNotification = function(msg) {
 UserInterface.prototype._template = function(msg) {
 
 	// template
-	var container = this.uiCreateElement({name: "div", className: "ui-default-container noselect"});
+	var container = this.uiCreateElement({name: "div", className: "ui-container ui-default-container noselect"});
 	var containerTitle = this.uiCreateElement({text: "level editor", name: "div", className: "ui-default-title noselect", attributes: [{name: "data-uidrag", value: 1}]});
 	var containerRemove = this.uiCreateElement({name: "button", className: "ui-default-title-button ui-icon-remove", attributes: [{name: "onclick", value: "UI.uiRemove(this, event)"}]});
 	var containerHide = this.uiCreateElement({name: "button", className: "ui-default-title-button ui-icon-hide", attributes: [{name: "onclick", value: "UI.uiHide(this, event)"}]});
