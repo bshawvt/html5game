@@ -67,14 +67,12 @@ function FloorObject(opt) {
 FloorObject.prototype.step = function(state) {
 	
 };
-FloorObject.prototype.setReady = function(state) {
-	this.isReady = state;
+FloorObject.prototype.onReady = function(sm) {
+	this.sceneManager = sm;
+	this.isReady = true;
 };
 FloorObject.prototype.getObject = function() {
 	return this.threeObj;
-};
-FloorObject.prototype.setSceneManager = function(sm) {
-	this.sceneManager = sm;
 };
 FloorObject.prototype.render = function() {
 

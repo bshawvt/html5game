@@ -27,7 +27,7 @@ function SceneManager(invoker) {
 	var mat = new THREE.LineBasicMaterial( { color: 0xcecece } );
 	this.map = new THREE.LineSegments(geo, mat); // map
 	this.map.renderOrder = 0;
-	this.scene.add(this.map);
+	//this.scene.add(this.map);
 	this.map.position.x = 0.0;//1.0;
 	this.map.position.y = 0.0;//-0.5;
 	this.map.position.z = 0.0;//-0.5;
@@ -37,7 +37,7 @@ function SceneManager(invoker) {
 	//this.map.scale.z = 5;
 
 	this.player = null;
-	this.add(new HighlightObject());
+	this.add(new CursorObject());
 
 }
 // game specific
@@ -48,7 +48,7 @@ SceneManager.prototype.add = function(obj, player) {
 	if (player == true) {
 		this.player = obj;
 	}
-	obj.setSceneManager(this);
+	//obj.setSceneManager(this);
 	obj.id = this.objectCount++;
 
 	this.objectsQueue.push(obj);
@@ -79,7 +79,7 @@ SceneManager.prototype.flush = function() {
 		else {
 			this.scene.add(obj.getObject());
 			this.objects.push(obj);
-			obj.setReady(true);
+			obj.onReady(this);
 		}
 	}
 	this.objectsQueue = [];

@@ -9,12 +9,107 @@ function SceneLevel(invoker, opt) {
 			this.cells[lx][ly] = {solid: true, texCoord: {x: 0.0, y: 0.0}, objects: []};
 		}
 	}
+
+	this.rooms = []; // generate randomized rooms
+	for(var i = 0; i < 2+Math.floor(Math.random()*8); i++) { // generate 2-10 rooms
+		this.rooms[i] = {x:0, y: 0, w: 0, h: 0};
+
+		this.rooms[i].x = 5 + Math.floor(Math.random() * (this.width - 18));// + offset.x;
+		this.rooms[i].y = 5 + Math.floor(Math.random() * (this.width - 18));// + offset.y;
+		this.rooms[i].w = 3 + Math.floor(Math.random() * 5);
+		this.rooms[i].h = 3 + Math.floor(Math.random() * 5);
+
+		var offset = {x: -2 + Math.floor(Math.random() * 4), y: -2 + Math.floor(Math.random() * 4)};
+
+		for(var fillx = offset.x; fillx < this.rooms[i].w; fillx++) {
+			for(var filly = offset.y; filly < this.rooms[i].h; filly++) {
+				this.cells[this.rooms[i].x+fillx][this.rooms[i].y+filly].solid = false;
+				this.cells[this.rooms[i].x+fillx][this.rooms[i].y+filly].texCoord = {x: 0.25, y: 0.50};
+			}
+		}
+	}
+	// connect rooms
+	var to = this.rooms[Math.floor(Math.random() * this.rooms.length)];
+	var dx = to.x - this.rooms[0].x;
+	var dy = to.y - this.rooms[0].y;
+	console.log(to.x, this.rooms[0].x);
+	console.log(to.y, this.rooms[0].y);
+	for(var i = 0; i < this.rooms.length; i++) {
+		var connections = 1 + Math.floor(Math.random() * 3);
+		for(var c = 0; c < connections; c++) {
+			var f = Math.floor(Math.random() * this.rooms.length);
+			if (f == i) {
+				if (f==0) {
+					f = 1;
+				}
+				else{
+					f = Math.floor(Math.random() * this.rooms.length);
+				}
+			}
+			var to = this.rooms[f];
+
+			//var dx = this.rooms[i].x - to.x;
+			//var dy = this.rooms[i].y - to.y;
+			var ixd = 1;
+			if (this.rooms[i].x > to.x) {
+				ixd = -1;
+			}
+
+			var iyd = 1;
+			if (this.rooms[i].y > to.y) {
+				iyd = -1;
+			}
+			for(var ix = this.rooms[i].x; ix != to.x; ix+=ixd) {
+				this.cells[ix][this.rooms[i].y].solid = false;
+				this.cells[ix][this.rooms[i].y].texCoord = {x: 0.25, y: 0.50};
+			}
+			for(var iy = this.rooms[i].y; iy != to.y; iy+=iyd) {
+				this.cells[to.x][iy].solid = false;
+				this.cells[to.x][iy].texCoord = {x: 0.25, y: 0.50};
+			}
+		}
+	}
+		//var to = this.rooms[Math.floor(Math.random() * this.rooms.length)];
+
+		/*var connections = 1 + Math.floor(Math.random() * 2);
+		for(var c = 0; c < connections; c++) {
+			var to = Math.floor(Math.random() * this.rooms.length);
+			if (to != i) {
+				var dx = this.rooms[i].x - this.rooms[to].x;
+				var cxd = 1;
+				if (dx > 0) {
+					cxd = -1;
+				}
+				else if (dx < 0) {
+					cxd = 1;
+				}
+				var dy = this.rooms[i].y - this.rooms[to].y;
+				var cyd = 1;
+				if (dy > 0) {
+					cyd = -1;
+				}
+				else if (dy < 0) {
+					cyd = 1;
+				}
+				console.log(i, dx, dy);
+				for(var cx = this.rooms[i].x; cx < this.rooms[to].x; cx+=cxd) {
+					for(var cy = this.rooms[i].y; cy < this.rooms[to].y; cy+=cyd) {
+						this.cells[cx][cy].solid = false;
+						this.cells[cx][cy].texCoord = {x: 0.0, y: 0.0};
+					}	
+				}
+			}
+		}*/
+
 	this.threeObj = null;
 	this.edit = false;
 	this.texCoord = {x: 0.0, y:0.0}
 }
 SceneLevel.prototype.moveObject = function(obj, from, to) {
-	console.log(this.cells[to.x][to.y]);
+	//console.log(to, from, this.width, this.height);
+	if ((to.x > this.width || to.x < 0) || (to.y > this.height || to.y < 0)) {
+		return false;
+	}
 	if (this.cells[to.x][to.y].solid == true) { return false; }
 	var prev = this.cells[from.x][from.y];
 	for(var i = 0; i < prev.objects.length; i++) {
@@ -31,7 +126,7 @@ SceneLevel.prototype.generateLevelMesh = function() {
 	if (this.threeObj !== null) {
 		this.threeObj.geometry.dispose();
 		this.threeObj = null;
-		console.log("asdasd");
+		//console.log("asdasd");
 	}
 	var geo = new THREE.BufferGeometry();
 	/*var verts = [	0, 0, 0,
@@ -100,74 +195,6 @@ SceneLevel.prototype.generateLevelMesh = function() {
 		}
 
 	}
-	/*
-	0.25 + xoff1, 0.00 + yoff1, 
-	0.25 + xoff1, 0.25 + yoff1, 
-	0.00 + xoff1, 0.00 + yoff1, 
-
-	0.00 + xoff1, 0.00 + yoff1,
-	0.25 + xoff1, 0.25 + yoff1, 
-	0.00 + xoff1, 0.25 + yoff1,	
-
-	0.25 + xoff2, 0.00 + yoff2, 
-	0.25 + xoff2, 0.25 + yoff2, 
-	0.00 + xoff2, 0.00 + yoff2, 
-
-	0.00 + xoff2, 0.00 + yoff2,
-	0.25 + xoff2, 0.25 + yoff2, 
-	0.00 + xoff2, 0.25 + yoff2	
-	*/
-	/*var verts = [	1, 0, 0,
-					1, 1, 0,
-					0, 0, 0,
-
-					0, 0, 0,
-					1, 1, 0, 
-					0, 1, 0]
-	var uvs = [ 0.5, 0.0, 
-				0.5, 0.5, 
-				0.0, 0.0, 
-
-				0.0, 0.0,
-				0.5, 0.5, 
-				0.0, 0.5	];*/
-	/*var verts = [	1 + xv, 0 + yv, 0,
-					1 + xv, 1 + yv, 0,
-					0 + xv, 0 + yv, 0,
-
-					0 + xv, 0 + yv, 0,
-					1 + xv, 1 + yv, 0, 
-					0 + xv, 1 + yv, 0,
-
-					2 + xv, 1 + yv, 0,
-					2 + xv, 2 + yv, 0,
-					1 + xv, 1 + yv, 0,
-
-					1 + xv, 1 + yv, 0,
-					2 + xv, 2 + yv, 0, 
-					1 + xv, 2 + yv, 0]
-
-
-	var xoff1 = 0.25;//0.25;
-	var yoff1 = 0.75;//1.0;
-	var xoff2 = 0.0;
-	var yoff2 = 0.75;
-
-	var uvs = [ 0.25 + xoff1, 0.00 + yoff1, 
-				0.25 + xoff1, 0.25 + yoff1, 
-				0.00 + xoff1, 0.00 + yoff1, 
-
-				0.00 + xoff1, 0.00 + yoff1,
-				0.25 + xoff1, 0.25 + yoff1, 
-				0.00 + xoff1, 0.25 + yoff1,	
-
-				0.25 + xoff2, 0.00 + yoff2, 
-				0.25 + xoff2, 0.25 + yoff2, 
-				0.00 + xoff2, 0.00 + yoff2, 
-
-				0.00 + xoff2, 0.00 + yoff2,
-				0.25 + xoff2, 0.25 + yoff2, 
-				0.00 + xoff2, 0.25 + yoff2	];*/
 
 	this.boffx = 0.2;
 	this.boffy = 1;
@@ -175,12 +202,18 @@ SceneLevel.prototype.generateLevelMesh = function() {
 	geo.addAttribute('position', new THREE.BufferAttribute(new Float32Array(verts), 3));
 	geo.addAttribute('uv', new THREE.BufferAttribute(new Float32Array(uvs), 2));
 	var tex = new THREE.TextureLoader().load('data/floors.png');
+	//tex.anisotropy = 0;
+	tex.magFilter = THREE.NearestFilter;
+	tex.minFilter = THREE.NearestFilter;
 	tex.wrapS = THREE.RepeatWrapping;
 	tex.wrapT = THREE.RepeatWrapping;
 	//console.log(tex);
 	//tex.repeat.set(0.25, 0.25);//1.0/128, 1.0/128)
 	//tex.offset.y = 0.5;
 	var mat = new THREE.MeshBasicMaterial( { transparent: true, map: tex } );//{ color: 0x5f5faf});//, side: THREE.DoubleSide } );
+	//mat.blending = THREE.CustomBlending;
+	//mat.blendSrc = THREE.OneFactor;
+	//mat.blendDst = THREE.OneMinusSrcAlphaFactor;
 	this.threeObj = new THREE.Mesh(geo, mat); // player
 	
 	this.threeObj.position.x = 0.0;
@@ -193,17 +226,15 @@ SceneLevel.prototype.generateLevelMesh = function() {
 	this.threeObj.renderOrder = 1;
 	this.threeObj.geometry.attributes.position.needsUpdate = true;
 	this.threeObj.geometry.attributes.uv.needsUpdate = true;
-	console.log(this.threeObj);
+	//console.log(this.threeObj);
 	return this.threeObj;
 };
-SceneLevel.prototype.setReady = function(state) {
-	this.isReady = state;
+SceneLevel.prototype.onReady = function(sm) {
+	this.sceneManager = sm;
+	this.isReady = true;
 };
 SceneLevel.prototype.getObject = function() {
 	return this.threeObj;
-};
-SceneLevel.prototype.setSceneManager = function(sm) {
-	this.sceneManager = sm;
 };
 SceneLevel.prototype.render = function() {
 

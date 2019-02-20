@@ -8,7 +8,9 @@ function Command(invoker, cmd, out) {
 			break;
 		}
 		case "uitest": {
-			UI.createNotification("test" + Math.random() * 100);
+			for(var i = 0; i < params[1] ? params[1] : 0; i++) {
+				UI.createNotification("test" + Math.random() * 100);
+			}
 			break;
 		}
 		/*case "": {
