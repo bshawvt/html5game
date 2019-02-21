@@ -21,20 +21,23 @@ function Game(invoker) {
 	//this.camera = new THREE.OrthographicCamera(-window.innerWidth, window.innerWidth, -window.innerHeight, window.innerHeight, -1000, 1000);
 	this.scene.camera.up = new THREE.Vector3(0, 0, 1);
 
-	this.scene.camera.position.x = -10;//-300;//-window.innerWidth / 2;
-	this.scene.camera.position.y = -10;//-300;//-window.innerHeight / 2;
-	this.scene.camera.position.z = 15;//125;//300;
+	//this.scene.camera.position.x = -10;//-300;//-window.innerWidth / 2;
+	//this.scene.camera.position.y = -10;//-300;//-window.innerHeight / 2;
+	this.scene.camera.position.z = 125;//15;//125;//300;
 	//this.camera.position.set(20, 20, 20);
 	//this.camera.rotation.order = 'XYZ';
 
 	this.scene.camera.lookAt(new THREE.Vector3(0, 0, 0));
+
+	this.scene.camera.position.x = 50;
+	this.scene.camera.position.y = 50;
 
 	window.addEventListener('resize', function() {
 		self.onResize(invoker);
 	});
 
 	this.onResize(invoker);
-	this.level = new SceneLevel(this, {w:50, h: 50});
+	this.level = new SceneLevel(this, {w:100, h: 100});
 	this.level.generateLevelMesh();
 
 	this.sceneManager = new SceneManager(this);
@@ -104,9 +107,9 @@ Game.prototype.update = function(dt) {
 	
 };
 Game.prototype.render = function(dt) {
-	this.scene.camera.position.x = this.sceneManager.player.cell.x - 10;
-	this.scene.camera.position.y = this.sceneManager.player.cell.y - 10;
-	this.scene.camera.lookAt(this.sceneManager.player.cell.x, this.sceneManager.player.cell.y, this.sceneManager.player.getObject().position.z);
+	//this.scene.camera.position.x = this.sceneManager.player.cell.x - 10;
+	//this.scene.camera.position.y = this.sceneManager.player.cell.y - 10;
+	//this.scene.camera.lookAt(this.sceneManager.player.cell.x, this.sceneManager.player.cell.y, this.sceneManager.player.getObject().position.z);
 	
 	this.sceneManager.render(dt);
 	this.renderer.render(this.scene, this.scene.camera);

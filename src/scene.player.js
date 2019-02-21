@@ -78,7 +78,20 @@ function PlayerObject(opt) {
 	this.anim = [];
 	//this.anim["move"] = {tick: 0, rotation: 0.02};
 
+	this.type = 0;//"humanoid";
+	this.health = 5;
+	this.magic = 0;
+
+	this.equipment = {head: null, chest: null, legs: null, feet: null, hands: null, amulet: null, rings: [null, null] };
+	this.likeList = [];
+	this.hateList = [];
+
 }
+PlayerObject.prototype.setPosition = function(x, y) {
+	this.cell = {x: x, y: y};
+	this.threeObj.position.x = x - this.boffx;
+	this.threeObj.position.y = y + this.boffy;
+};
 PlayerObject.prototype.step = function(state) {
 	if (state.dt - this.lastStepTime > this.speed) {
 		this.lastStepTime = state.dt;
@@ -117,6 +130,9 @@ PlayerObject.prototype.step = function(state) {
 					this.threeObj.position.y = this.travelTo.next.y + this.boffy;
 					
 					if ((this.travelTo.x == this.cell.x) && (this.travelTo.y == this.cell.y)) {
+						if (this.sceneManager.level.cells[this.travelTo.next.x][this.travelTo.next.y].type=="stair_down") {
+							this.sceneManager.level.generateDungeon(this);
+						}
 						this.travelTo = null;
 					}
 				}
@@ -135,7 +151,7 @@ PlayerObject.prototype.step = function(state) {
 	if (Controller.getMouseState(Input.MOUSE_LEFT) && state.active==true) {
 		if (canMove == false) { return; }
 
-		var m2d = Controller.getMousePosition();
+		var m2d = Controller.getCursorPosition();
 		//if (m2d.x > (window.innerWidth/2)) {
 			//this.threeObj.scale.x = 2;
 			//this.threeObj.scale.y = 2;

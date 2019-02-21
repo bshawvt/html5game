@@ -2,73 +2,12 @@ function SceneLevel(invoker, opt) {
 	this.sceneManager = null;
 	this.width = opt.w?opt.w:1;
 	this.height = opt.h?opt.h:1;
+	
 	this.cells = [];
-	for(var lx = 0; lx < this.width; lx++) {
-		this.cells[lx] = [];
-		for(var ly = 0; ly < this.height; ly++) {
-			this.cells[lx][ly] = {solid: true, texCoord: {x: 0.0, y: 0.0}, objects: []};
-		}
-	}
+	this.rooms = [];
+	this.exits = {up: null, down: null};
 
-	this.rooms = []; // generate randomized rooms
-	for(var i = 0; i < 2+Math.floor(Math.random()*8); i++) { // generate 2-10 rooms
-		this.rooms[i] = {x:0, y: 0, w: 0, h: 0};
-
-		this.rooms[i].x = 5 + Math.floor(Math.random() * (this.width - 18));// + offset.x;
-		this.rooms[i].y = 5 + Math.floor(Math.random() * (this.width - 18));// + offset.y;
-		this.rooms[i].w = 3 + Math.floor(Math.random() * 5);
-		this.rooms[i].h = 3 + Math.floor(Math.random() * 5);
-
-		var offset = {x: -2 + Math.floor(Math.random() * 4), y: -2 + Math.floor(Math.random() * 4)};
-
-		for(var fillx = offset.x; fillx < this.rooms[i].w; fillx++) {
-			for(var filly = offset.y; filly < this.rooms[i].h; filly++) {
-				this.cells[this.rooms[i].x+fillx][this.rooms[i].y+filly].solid = false;
-				this.cells[this.rooms[i].x+fillx][this.rooms[i].y+filly].texCoord = {x: 0.25, y: 0.50};
-			}
-		}
-	}
-	// connect rooms
-	var to = this.rooms[Math.floor(Math.random() * this.rooms.length)];
-	var dx = to.x - this.rooms[0].x;
-	var dy = to.y - this.rooms[0].y;
-	console.log(to.x, this.rooms[0].x);
-	console.log(to.y, this.rooms[0].y);
-	for(var i = 0; i < this.rooms.length; i++) {
-		var connections = 1 + Math.floor(Math.random() * 3);
-		for(var c = 0; c < connections; c++) {
-			var f = Math.floor(Math.random() * this.rooms.length);
-			if (f == i) {
-				if (f==0) {
-					f = 1;
-				}
-				else{
-					f = Math.floor(Math.random() * this.rooms.length);
-				}
-			}
-			var to = this.rooms[f];
-
-			//var dx = this.rooms[i].x - to.x;
-			//var dy = this.rooms[i].y - to.y;
-			var ixd = 1;
-			if (this.rooms[i].x > to.x) {
-				ixd = -1;
-			}
-
-			var iyd = 1;
-			if (this.rooms[i].y > to.y) {
-				iyd = -1;
-			}
-			for(var ix = this.rooms[i].x; ix != to.x; ix+=ixd) {
-				this.cells[ix][this.rooms[i].y].solid = false;
-				this.cells[ix][this.rooms[i].y].texCoord = {x: 0.25, y: 0.50};
-			}
-			for(var iy = this.rooms[i].y; iy != to.y; iy+=iyd) {
-				this.cells[to.x][iy].solid = false;
-				this.cells[to.x][iy].texCoord = {x: 0.25, y: 0.50};
-			}
-		}
-	}
+	this.generateDungeon();
 		//var to = this.rooms[Math.floor(Math.random() * this.rooms.length)];
 
 		/*var connections = 1 + Math.floor(Math.random() * 2);
@@ -105,8 +44,165 @@ function SceneLevel(invoker, opt) {
 	this.edit = false;
 	this.texCoord = {x: 0.0, y:0.0}
 }
+SceneLevel.prototype.generateDungeon = function(player) {
+
+	this.cells = [];
+	this.rooms = [];
+	this.exits = {up: null, down: null};
+
+	 // init grid
+	for(var lx = 0; lx < this.width; lx++) {
+		this.cells[lx] = [];
+		for(var ly = 0; ly < this.height; ly++) {
+			this.cells[lx][ly] = {solid: true, type: 0, texCoord: {x: 0.0, y: 0.0}, objects: []};
+		}
+	}
+
+	// generate randomized rooms
+	var numRooms = 15;
+	for(var i = 0; i < 2+numRooms; i++) { // generate 2-10 rooms
+		this.rooms[i] = {x:0, y: 0, w: 0, h: 0};
+
+		this.rooms[i].x = 5 + Math.floor(Math.random() * (this.width - 18));// + offset.x;
+		this.rooms[i].y = 5 + Math.floor(Math.random() * (this.width - 18));// + offset.y;
+		this.rooms[i].w = 3 + Math.floor(Math.random() * 5);
+		this.rooms[i].h = 3 + Math.floor(Math.random() * 5);
+
+		var offset = {x: -2 + Math.floor(Math.random() * 4), y: -2 + Math.floor(Math.random() * 4)};
+
+		for(var fillx = -2; fillx < this.rooms[i].w; fillx++) {
+			for(var filly = -2; filly < this.rooms[i].h; filly++) {
+				var coord = {x: 0.25, y: 0.50};
+				/*if (this.exits.down == null && Math.floor(Math.random() * 25) == 1) {
+					this.cells[this.rooms[i].x+fillx][this.rooms[i].y+filly].type = 1;
+					coord = {x: 0.50, y: 0.50};
+					this.exits.down = {x: this.rooms[i].x+fillx, y: this.rooms[i].y+filly};
+				}
+				if (this.exits.up == null && Math.floor(Math.random() * 25) == 1) {
+					this.cells[this.rooms[i].x+fillx][this.rooms[i].y+filly].type = 2;
+					coord = {x: 0.50, y: 0.50};
+					this.exits.up = {x: this.rooms[i].x+fillx, y: this.rooms[i].y+filly};
+				}*/
+				this.cells[this.rooms[i].x+fillx][this.rooms[i].y+filly].solid = false;
+				this.cells[this.rooms[i].x+fillx][this.rooms[i].y+filly].texCoord = coord;
+			}
+		}
+	}
+	
+	// connect rooms
+	for (var i = 0; i < this.rooms.length; i++) {
+		var next = (i+1>=this.rooms.length-1?0:i+1);
+		var from = {x: this.rooms[i].x, y: this.rooms[i].y};
+		var to = {x: this.rooms[next].x, y: this.rooms[next].y};
+		var tileStep = {x:from.x, y:from.y}
+
+		var done = false;
+		while (!done) {
+
+			if (this.cells[tileStep.x][tileStep.y].type == "passage") { done = true; }
+			this.cells[tileStep.x][tileStep.y].solid = false;
+			this.cells[tileStep.x][tileStep.y].type = "passage";
+			this.cells[tileStep.x][tileStep.y].texCoord = {x: 0.25, y: 0.50};
+			
+			var dx = tileStep.x - to.x;
+			var dy = tileStep.y - to.y;
+
+			if (dx > 0) {
+				tileStep.x--;
+			}
+			else if ( dx < 0) {
+				tileStep.x++;
+			}
+
+			if (dy > 0) {
+				tileStep.y--;
+			}
+			else if ( dy < 0) {
+				tileStep.y++;
+			}
+
+			if (tileStep.x == to.x && tileStep.y == to.y) {
+				done = true;
+			}
+
+		}
+
+
+	}
+	
+	if (this.exits.down == null) {
+		var r = this.rooms.length - 1;
+		this.exits.down = {x: this.rooms[r].x, y: this.rooms[r].y};
+		this.cells[this.rooms[r].x][this.rooms[r].y].type = "stair_down";
+		this.cells[this.rooms[r].x][this.rooms[r].y].solid = false;
+		this.cells[this.rooms[r].x][this.rooms[r].y].texCoord = {x: 0.50, y: 0.50};
+	}
+	if (this.exits.up == null) {
+		var r = Math.floor(Math.random()*(this.rooms.length-1));
+		//console.log(this.rooms.length, rx);
+		this.exits.up = {x: this.rooms[r].x, y: this.rooms[r].y};
+		this.cells[this.rooms[r].x][this.rooms[r].y].type = "stair_up";
+		this.cells[this.rooms[r].x][this.rooms[r].y].solid = false;
+		this.cells[this.rooms[r].x][this.rooms[r].y].texCoord = {x: 0.50, y: 0.50};
+	}
+
+	// verify rooms are connected, else fix
+	for(var i = 0; i < this.rooms.length; i++) { 
+		var from = this.rooms[i];
+		var to = this.exits.down;
+
+	}
+
+	console.log(this.exits);
+	console.log(this.cells[this.exits.up.x][this.exits.up.y], this.cells[this.exits.down.x][this.exits.down.y])
+	
+	if (this.isReady == true) {
+		this.sceneManager.removeSceneObject(this.threeObj);
+		this.generateLevelMesh();
+		this.sceneManager.scene.add(this.threeObj);
+
+		if (player!==undefined) {
+			console.log("reee");
+			console.log(player, this.exits.up);
+			this.moveObject(player, player.cell, {x: this.exits.up.x, y: this.exits.up.y} );
+			player.setPosition(this.exits.up.x, this.exits.up.y);
+		}
+	}
+};
+SceneLevel.prototype.findExit = function(from, to) {
+	var done = false;
+	var step = {x: from.x, y: from.y};
+	var steps = 0;
+	while (!done || steps > 1000) {
+
+		var dx = step.x - to.x;
+		var dy = step.y - to.y;
+
+		if (dx > 0) {
+			step.x--;
+		}
+		else if ( dx < 0) {
+			step.x++;
+		}
+
+		if (dy > 0) {
+			step.y--;
+		}
+		else if ( dy < 0) {
+			step.y++;
+		}
+
+		if (step.x == to.x && step.y == to.y) {
+			return true;
+		}
+		steps++;
+	}
+	return false;
+
+};
 SceneLevel.prototype.moveObject = function(obj, from, to) {
 	//console.log(to, from, this.width, this.height);
+	//console.log(to);
 	if ((to.x > this.width || to.x < 0) || (to.y > this.height || to.y < 0)) {
 		return false;
 	}
@@ -245,7 +341,7 @@ SceneLevel.prototype.step = function() {
 		if (Controller.getMouseState(Input.MOUSE_LEFT)) {
 			if (this.hasClicked == true) { return; }
 
-			var m2d = Controller.getMousePosition();
+			var m2d = Controller.getCursorPosition();
 
 			var m3d = {x: (m2d.x/window.innerWidth) * 2 - 1, y: -(m2d.y/window.innerHeight) * 2 + 1};
 			var p0 = new THREE.Vector3(m3d.x, m3d.y, 0.0).unproject(this.sceneManager.scene.camera);

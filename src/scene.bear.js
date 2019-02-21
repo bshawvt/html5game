@@ -64,6 +64,9 @@ function BearObject(opt) {
 
 	this.lastStepTime = 0;
 	this.speed = 50;
+
+	this.health = 10;
+	this.magic = 0;
 }
 BearObject.prototype.step = function(state) {
 	if (state.dt - this.lastStepTime > this.speed) {

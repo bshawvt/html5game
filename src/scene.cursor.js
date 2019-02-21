@@ -69,7 +69,7 @@ function CursorObject(opt) {
 
 }
 CursorObject.prototype.step = function(state) {
-	var m2d = Controller.getMousePosition();
+	var m2d = Controller.getCursorPosition();
 
 	var m3d = {x: (m2d.x/window.innerWidth) * 2 - 1, y: -(m2d.y/window.innerHeight) * 2 + 1};
 	var p0 = new THREE.Vector3(m3d.x, m3d.y, 0.0).unproject(this.sceneManager.scene.camera);
@@ -82,6 +82,10 @@ CursorObject.prototype.step = function(state) {
 
 	var nx = Math.floor(p2.x);
 	var ny = Math.floor(p2.y);
+	if (Controller.getMouseState(Input.MOUSE_LEFT)) {
+		console.log(nx, ny);
+		console.log(this.sceneManager.level.cells[nx][ny]);
+	}
 	if ((nx >= 0 && nx < this.sceneManager.level.width) && (ny >= 0 && ny < this.sceneManager.level.height)) {
 		
 		this.threeObj.position.x = nx;
@@ -108,8 +112,6 @@ CursorObject.prototype.step = function(state) {
 		var pcell = this.sceneManager.player.cell;
 		var to1 = Math.floor((nx * nx) + (ny * ny));
 		var to2 = Math.floor((pcell.x * pcell.x) + (pcell.y * pcell.y));
-		//console.log(to1, to2, to1-to2);
-
 
 		//this.sceneManager.player.cell.x;// = 0.0;
 
