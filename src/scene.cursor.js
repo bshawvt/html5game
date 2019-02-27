@@ -82,9 +82,11 @@ CursorObject.prototype.step = function(state) {
 
 	var nx = Math.floor(p2.x);
 	var ny = Math.floor(p2.y);
-	if (Controller.getMouseState(Input.MOUSE_LEFT)) {
-		console.log(nx, ny);
-		console.log(this.sceneManager.level.cells[nx][ny]);
+	if (nx >= 0 && nx < this.sceneManager.level.width && ny >= 0 && ny < this.sceneManager.level.height) { 
+		if (Controller.getMouseState(Input.MOUSE_LEFT)) {
+			console.log(nx, ny);
+			console.log(this.sceneManager.level.cells[nx][ny]);
+		}
 	}
 	if ((nx >= 0 && nx < this.sceneManager.level.width) && (ny >= 0 && ny < this.sceneManager.level.height)) {
 		

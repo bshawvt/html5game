@@ -54,35 +54,35 @@ SceneLevel.prototype.generateDungeon = function(player) {
 	for(var lx = 0; lx < this.width; lx++) {
 		this.cells[lx] = [];
 		for(var ly = 0; ly < this.height; ly++) {
-			this.cells[lx][ly] = {solid: true, type: 0, texCoord: {x: 0.0, y: 0.0}, objects: []};
+			this.cells[lx][ly] = {solid: false, type: 0, texCoord: {x: 0.0, y: 0.75}, objects: []};//, pathing: {f: 0, g: 0, h: 0, parent: null}};
+			if ((lx == (this.width/2)-2 || lx == (this.width/2)-1 || lx == (this.width/2) || 
+				lx == (this.width/2)+1 || lx == (this.width/2)+2) && ly == (this.height/2)) {
+				this.cells[lx][ly].solid = true;
+				this.cells[lx][ly].texCoord = {x: 0.0, y: 0.0};
+			}
 		}
 	}
 
-	// generate randomized rooms
-	var numRooms = 15;
+	// generate rooms
+	var numRooms = 0;//15;
 	for(var i = 0; i < 2+numRooms; i++) { // generate 2-10 rooms
 		this.rooms[i] = {x:0, y: 0, w: 0, h: 0};
 
 		this.rooms[i].x = 5 + Math.floor(Math.random() * (this.width - 18));// + offset.x;
 		this.rooms[i].y = 5 + Math.floor(Math.random() * (this.width - 18));// + offset.y;
-		this.rooms[i].w = 3 + Math.floor(Math.random() * 5);
-		this.rooms[i].h = 3 + Math.floor(Math.random() * 5);
+		this.rooms[i].w = 3 + Math.floor(Math.random() * 8);
+		this.rooms[i].h = 3 + Math.floor(Math.random() * 8);
 
-		var offset = {x: -2 + Math.floor(Math.random() * 4), y: -2 + Math.floor(Math.random() * 4)};
-
-		for(var fillx = -2; fillx < this.rooms[i].w; fillx++) {
-			for(var filly = -2; filly < this.rooms[i].h; filly++) {
+		//var offset = {x: -3 + Math.floor(Math.random() * 5), y: -3 + Math.floor(Math.random() * 5)};
+		//var offset = {x: Math.floor(this.rooms[i].w/2) - Math.floor(Math.random() * this.rooms[i].w), y: Math.floor(this.rooms[i].h/2) - Math.floor(Math.random() * this.rooms[i].h)};
+		//var offset = {x: Math.floor(this.rooms[i].w/2), y: Math.floor(this.rooms[i].h/2)};
+		//var offset = {x: -1, y: -1};
+		var fw = Math.floor(this.rooms[i].w/2);
+		var fh = Math.floor(this.rooms[i].h/2);
+		var offset = {x: -fw, y: -fh}
+		for(var fillx = offset.x; fillx < this.rooms[i].w+offset.x; fillx++) {
+			for(var filly = offset.y; filly < this.rooms[i].h+offset.y; filly++) {
 				var coord = {x: 0.25, y: 0.50};
-				/*if (this.exits.down == null && Math.floor(Math.random() * 25) == 1) {
-					this.cells[this.rooms[i].x+fillx][this.rooms[i].y+filly].type = 1;
-					coord = {x: 0.50, y: 0.50};
-					this.exits.down = {x: this.rooms[i].x+fillx, y: this.rooms[i].y+filly};
-				}
-				if (this.exits.up == null && Math.floor(Math.random() * 25) == 1) {
-					this.cells[this.rooms[i].x+fillx][this.rooms[i].y+filly].type = 2;
-					coord = {x: 0.50, y: 0.50};
-					this.exits.up = {x: this.rooms[i].x+fillx, y: this.rooms[i].y+filly};
-				}*/
 				this.cells[this.rooms[i].x+fillx][this.rooms[i].y+filly].solid = false;
 				this.cells[this.rooms[i].x+fillx][this.rooms[i].y+filly].texCoord = coord;
 			}
@@ -90,7 +90,8 @@ SceneLevel.prototype.generateDungeon = function(player) {
 	}
 	
 	// connect rooms
-	for (var i = 0; i < this.rooms.length; i++) {
+	var l = 0//;this.rooms.length;
+	for (var i = 0; i < l; i++) {
 		var next = (i+1>=this.rooms.length-1?0:i+1);
 		var from = {x: this.rooms[i].x, y: this.rooms[i].y};
 		var to = {x: this.rooms[next].x, y: this.rooms[next].y};
@@ -147,10 +148,15 @@ SceneLevel.prototype.generateDungeon = function(player) {
 	}
 
 	// verify rooms are connected, else fix
-	for(var i = 0; i < this.rooms.length; i++) { 
-		var from = this.rooms[i];
-		var to = this.exits.down;
-
+	for(var i = 0; i < 1; i++) { 
+		var from = {x: Math.floor(this.width/2), y: (this.height/2) - 5};//this.rooms[i];
+		var to =   {x: Math.floor(this.width/2), y: (this.height/2) + 5};//this.exits.down;
+		if (this.findPath(from, to) !== null) {
+			//console.log("does compute");
+		}
+		else {
+			//console.log("does not compute");
+		}
 	}
 
 	console.log(this.exits);
@@ -169,37 +175,195 @@ SceneLevel.prototype.generateDungeon = function(player) {
 		}
 	}
 };
-SceneLevel.prototype.findExit = function(from, to) {
+SceneLevel.prototype.findPath = function(from, to) {
 	var done = false;
-	var step = {x: from.x, y: from.y};
+	//var step = {x: from.x, y: from.y};
 	var steps = 0;
-	while (!done || steps > 1000) {
 
-		var dx = step.x - to.x;
-		var dy = step.y - to.y;
+	var path = {};
+	var open = [];//
+					/*{
+						x: 0, y: 0, // node location in this.cells
+						parent: {x: 0, y: 0}, // parent this.cells location or null
+						f: g+h, g: g, h: h // scores
+					}
+				];*/
+	var closed = [];
 
-		if (dx > 0) {
-			step.x--;
-		}
-		else if ( dx < 0) {
-			step.x++;
+	var openSet = new Set();
+	var closedSet = new Set();
+
+	open.push({	x: from.x, y: from.y, 
+				f: 0, g: 0, h: 0, 
+				parent: null });
+
+	while (open.length > 0) {// && steps < 100) {//!done && steps < 1000) {
+		var step = open.pop();
+		console.log("popped: ", step, open.length);
+		var cell = this.cells[step.x][step.y];
+		if (!closedSet.has(cell)) {
+			closedSet.add(cell);
+			cell.texCoord = {x:0.25, y:0.25}; // looked at
 		}
 
-		if (dy > 0) {
-			step.y--;
-		}
-		else if ( dy < 0) {
-			step.y++;
-		}
+		//var parent = step;
+		
+		// look at neighboring cells and add to open set if not solid
+		for(var x = -1; x < 2; x++) {
+			for(var y = -1; y < 2; y++) {
+				if (x == 0 && y == 0) continue; // parent cell of node
+				var sx = step.x + x;
+				var sy = step.y + y;
+				if (sx >= 0 && sx < this.width && sy >= 0 && sy < this.height) {
+					var cell = this.cells[sx][sy];
+					//cell.texCoord = {x:0.25, y:0.25}; // looked at
+					var mod = 14;
+					if (y == 0 || x == 0) {
+						mod = 10;
+					}
+					
+					var node = {	x: sx, y: sy, 
+									f: 0,//g+h, 
+									g: 0,//g, 
+									h: 0,//h,
+									parent: step
+								};//{x: step.x, y: step.y, f: g+h, g: g, h: h } };
+					var g = node.parent.g + mod;
+					var h = Math.abs(sx - to.x) + Math.abs(sy - to.y);
+					node.g = g;
+					node.h = h;
+					node.f = g+h;
+					if (cell.solid == false) {
+						if (!openSet.has(cell)) {
+							open.push(node);
+							openSet.add(cell);
+							cell.texCoord = {x:0.0, y:0.25}; // unexplored
+						}
+					}
 
-		if (step.x == to.x && step.y == to.y) {
-			return true;
+					if (sx == to.x && sy == to.y) {
+						open = [];
+						break;
+					}
+
+				}
+			}
 		}
 		steps++;
 	}
-	return false;
+
+	this.cells[from.x][from.y].texCoord = {x:0.50, y:0.0};
+	this.cells[to.x][to.y].texCoord = {x:0.50, y:0.25};
+	//console.log(steps);
+	return null;
 
 };
+
+		/*var dx = step.x - to.x;
+		var dy = step.y - to.y;
+
+		search.center = this.cells[step.x][step.y];
+		search.center.texCoord = {x: 0.25, y: 0.25}
+		closed.push({parent: null, cell: search.center});
+
+		search.n = this.cells[step.x-1][step.y];
+		search.nw = this.cells[step.x-1][step.y-1];
+		search.ne = this.cells[step.x-1][step.y+1];
+
+		search.s = this.cells[step.x+1][step.y];
+		search.sw = this.cells[step.x+1][step.y-1];
+		search.se = this.cells[step.x+1][step.y+1];
+
+		search.w = this.cells[step.x][step.y-1];
+		search.e = this.cells[step.x][step.y+1];
+
+		var f = 0;
+		var g = 0; 
+		var h = 0;
+		if (search.n.solid == false) {
+			g = 
+			open.push({parent: search.center, cell: search.n, f: f, g: g, h: h});
+			search.n.texCoord = {x:0.0, y:0.25}
+		}
+		else {
+			search.n.texCoord = {x:0.0, y:0.50}
+		}
+
+		if (search.nw.solid == false) {
+			open.push({parent: search.center, cell: search.nw, f: 0, g: 14, h: 0});
+			search.nw.texCoord = {x:0.0, y:0.25}
+		}
+		else {
+			search.nw.texCoord = {x:0.25, y:0.50}
+		}
+
+		if (search.ne.solid == false) {
+			open.push({parent: search.center, cell: search.ne, f: 0, g: 14, h: 0});
+			search.ne.texCoord = {x:0.0, y:0.25}
+		}
+		else {
+			search.ne.texCoord = {x:0.25, y:0.50}
+		}
+
+		if (search.s.solid == false) {
+			open.push({parent: search.center, cell: search.s, f: 0, g: 10, h: 0});
+			search.s.texCoord = {x:0.0, y:0.25}
+		}
+		else {
+			search.s.texCoord = {x:0.25, y:0.50}
+		}
+
+		if (search.sw.solid == false) {
+			open.push({parent: search.center, cell: search.sw, f: 0, g: 14, h: 0});
+			search.sw.texCoord = {x:0.0, y:0.25}
+		}
+		else {
+			search.sw.texCoord = {x:0.25, y:0.50}
+		}
+
+		if (search.se.solid == false) {
+			open.push({parent: search.center, cell: search.se, f: 0, g: 14, h: 0});
+			search.se.texCoord = {x:0.0, y:0.25}
+		}
+		else {
+			search.se.texCoord = {x:0.25, y:0.50}
+		}
+
+		if (search.w.solid == false) {
+			open.push({parent: search.center, cell: search.w, f: 0, g: 10, h: 0});
+			search.w.texCoord = {x:0.0, y:0.25}
+		}
+		else {
+			search.w.texCoord = {x:0.25, y:0.50}
+		}
+
+		if (search.e.solid == false) {
+			open.push({parent: search.center, cell: search.e, f: 0, g: 10, h: 0});
+			search.e.texCoord = {x:0.0, y:0.25}
+		}
+		else {
+			search.e.texCoord = {x:0.25, y:0.50}
+		}*/
+
+		/*search.n.texCoord = {x:0.0, y:0.25};
+		search.nw.texCoord = {x:0.0, y:0.25};
+		search.ne.texCoord = {x:0.0, y:0.25};
+
+		search.s.texCoord = {x:0.0, y:0.25};
+		search.sw.texCoord = {x:0.0, y:0.25};
+		search.se.texCoord = {x:0.0, y:0.25};
+
+		search.w.texCoord = {x:0.0, y:0.25};
+		search.e.texCoord = {x:0.0, y:0.25};
+
+
+		//done = true;
+		steps++;
+	}
+	//console.log(steps);
+	return null;
+
+};*/
 SceneLevel.prototype.moveObject = function(obj, from, to) {
 	//console.log(to, from, this.width, this.height);
 	//console.log(to);

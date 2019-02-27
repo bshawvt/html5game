@@ -23,7 +23,7 @@ function Game(invoker) {
 
 	//this.scene.camera.position.x = -10;//-300;//-window.innerWidth / 2;
 	//this.scene.camera.position.y = -10;//-300;//-window.innerHeight / 2;
-	this.scene.camera.position.z = 125;//15;//125;//300;
+	this.scene.camera.position.z = 140;//15;//125;//300;
 	//this.camera.position.set(20, 20, 20);
 	//this.camera.rotation.order = 'XYZ';
 
